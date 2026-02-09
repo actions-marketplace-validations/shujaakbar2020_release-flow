@@ -33,6 +33,10 @@ pub fn calculate_next_version(current_version: &Version, commits: &[String]) -> 
                         bump = BumpType::Patch;
                     }
                 }
+                "chore" => {
+                    bump = BumpType::Patch;
+                    break;
+                }
                 _ => {
                     // Other types (docs, style, refactor, etc.) usually imply patch or no bump
                     // semantic-release usually bumps patch for these if configured, but default is often just fix/feat
@@ -66,4 +70,39 @@ pub fn calculate_next_version(current_version: &Version, commits: &[String]) -> 
     }
 
     Ok((next_version, bump))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_calculate_next_version_major() {
+        let current_version = Version::parse("1.2.3").unwrap();
+        let commits = vec!["major: rewrite everything".to_string()];
+        let (next_version, bump) = calculate_next_version(&current_version, &commits).unwrap();
+        
+        assert_eq!(bump, BumpType::Major);
+        assert_eq!(next_version, Version::parse("2.0.0").unwrap());
+    }
+
+    #[test]
+    fn test_calculate_next_version_fix() {
+        let current_version = Version::parse("1.2.3").unwrap();
+        let commits = vec!["fix: bug fix".to_string()];
+        let (next_version, bump) = calculate_next_version(&current_version, &commits).unwrap();
+        
+        assert_eq!(bump, BumpType::Patch);
+        assert_eq!(next_version, Version::parse("1.2.4").unwrap());
+    }
+
+    #[test]
+    fn test_calculate_next_version_feat() {
+        let current_version = Version::parse("1.2.3").unwrap();
+        let commits = vec!["feat: new feature".to_string()];
+        let (next_version, bump) = calculate_next_version(&current_version, &commits).unwrap();
+        
+        assert_eq!(bump, BumpType::Minor);
+        assert_eq!(next_version, Version::parse("1.3.0").unwrap());
+    }
 }
