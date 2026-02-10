@@ -79,7 +79,7 @@ mod tests {
     #[test]
     fn test_calculate_next_version_major() {
         let current_version = Version::parse("1.2.3").unwrap();
-        let commits = vec!["major: rewrite everything".to_string()];
+        let commits = vec!["chore!: rewrite everything".to_string()];
         let (next_version, bump) = calculate_next_version(&current_version, &commits).unwrap();
         
         assert_eq!(bump, BumpType::Major);
